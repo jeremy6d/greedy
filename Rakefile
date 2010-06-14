@@ -11,7 +11,7 @@ begin
     gem.homepage = "http://github.com/jeremy6d/greedy"
     gem.authors = ["Jeremy Weiland"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
-    gem.add_development_dependency "jm-matchy"
+    gem.add_development_dependency "mcmire-matchy"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new

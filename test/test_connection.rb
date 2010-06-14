@@ -42,7 +42,7 @@ class TestConnection < Test::Unit::TestCase
     context "using GData to" do
       setup do
         @body = stub("unparsed response body")
-        @response = stub("google reader API response", :body => @body)
+          @response = stub("google reader API response", :body => @body)
         @return_hash = { :eeny => 'meeny', :miney => "moe" }
         JSON.stubs(:parse).with(@body).returns(@return_hash)
       end
@@ -52,8 +52,12 @@ class TestConnection < Test::Unit::TestCase
           @client.stubs(:get).returns(@response)
         end
       
-        should "get able to construct a valid url to the API given a path and options" do
-          @client.expects(:get).with("http://www.google.com/reader/api/0/path/to/resource?t=wesdg&n=10").returns(@response)
+        should "construct a valid url to the API given a path and options" do
+          valid_urls = ["http://www.google.com/reader/api/0/path/to/resource?n=10&t=wesdg",
+                        "http://www.google.com/reader/api/0/path/to/resource?t=wesdg&n=10"]
+          @client.expects(:get).with do |value|
+            valid_urls.include?(value)
+          end.returns(@response)
           @connection.fetch("path/to/resource", :n => 10, :t => "wesdg")
         end
       
