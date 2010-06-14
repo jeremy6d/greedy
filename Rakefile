@@ -5,12 +5,13 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "greedy"
-    gem.summary = %Q{TODO: one-line summary of your gem}
-    gem.description = %Q{TODO: longer description of your gem}
+    gem.summary = "Access a Google Reader reading list"
+    gem.description = "With greedy, you can access and manipulate the reading list for a Google Reader account via the API. Inspired by John Nunemaker's GoogleReader gem."
     gem.email = "jeremy6d@gmail.com"
     gem.homepage = "http://github.com/jeremy6d/greedy"
     gem.authors = ["Jeremy Weiland"]
     gem.add_development_dependency "thoughtbot-shoulda", ">= 0"
+    gem.add_development_dependency "jm-matchy"
     # gem is a Gem::Specification... see http://www.rubygems.org/read/chapter/20 for additional settings
   end
   Jeweler::GemcutterTasks.new
