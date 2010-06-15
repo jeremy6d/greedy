@@ -1,6 +1,6 @@
 = greedy
 
-Description goes here.
+A simple library for basic interfacing with the Google Reader API, inspired by John Nunemaker's google/reader gem (now defunct).
 
 == Note on Patches/Pull Requests
  
