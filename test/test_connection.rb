@@ -61,19 +61,22 @@ class TestConnection < Test::Unit::TestCase
           @connection.fetch("path/to/resource", :n => 10, :t => "wesdg")
         end
       
-        should "be able to return the response body parsed into a hash" do
+        should "be able to return the response" do
           JSON.expects(:parse).with(@body).returns(@return_hash)
           @connection.fetch("path").should == @return_hash
         end
       end
     
-      context "sending data" do
+      context "send data" do
         should "send a POST to the path with the options turned into the POST body" do
           @client.expects(:post).with("http://www.google.com/reader/api/0/sample/path", {:option => 'one'}).returns(@response)
           @connection.post "sample/path", :option => "one"
         end
-        should "be able to convert a hash of options into a post body"
-        should "be able to handle the response"
+        
+        should "be able to handle the response" do
+          @client.stubs(:post).returns(@response)
+          @connection.post("path/to/resource").should == @return_hash
+        end
       end
     end
   end

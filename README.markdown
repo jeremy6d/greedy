@@ -1,6 +1,25 @@
-= greedy
+# Greedy #
 
-Description goes here.
+A simple way to use the Google Reader API to retrieve streams of content.
+
+## Dependencies ##
+
+* gdata (http://rubygems.org/gems/gdata)
+
+## Usage Example ##
+
+`list = Greedy::Stream.new("username", "password")
+list.pull!("reading-list", 10)
+list.entries.each do |e| # iterate over each Greedy::Entry
+  puts e.title
+  puts e.body
+end
+list.continue!(20).entries.each do |e| # pull next 20 and iterate over them
+  e.mark_as_read!
+  e.share!
+end
+list.continue!(50)
+list.entries.size # 80`
 
 == Note on Patches/Pull Requests
  

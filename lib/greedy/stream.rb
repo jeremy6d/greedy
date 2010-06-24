@@ -1,7 +1,7 @@
 require 'greedy'
 
 module Greedy
-  class Stream # should this be connection? Should reading list be stream?
+  class Stream
     BASE_PATH = "stream/contents/user/-/state/com.google/"    
 
     attr_accessor :entries    
