@@ -33,12 +33,19 @@ class TestConnection < Test::Unit::TestCase
       end
     end  
     
-    should "fail gracefully when authentication fails" do
-      @handler.stubs(:get_token).with("username", "password", "app").raises("a gdata exception")
-      conn = Greedy::Connection.new("username", "password", "app")
-      conn.should_not be_connected
-    end
+    context "upon instantiation when authentication fails" do
+      context "because of a 403" do
+        setup do
+          @response = stub("response", :status_code => '403', :body => "Error=BadAuthentication")
+          @handler.stubs(:get_token).with("username", "password", "app").raises(GData::Client::AuthorizationError, @response)
+        end
     
+        should "raise an authentication error" do
+          lambda { Greedy::Connection.new("username", "password", "app") }.should raise_error(Greedy::AuthorizationError)
+        end
+      end
+    end
+  
     context "using GData to" do
       setup do
         @body = stub("unparsed response body")
@@ -69,7 +76,10 @@ class TestConnection < Test::Unit::TestCase
     
       context "send data" do
         should "send a POST to the path with the options turned into the POST body" do
-          @client.expects(:post).with("http://www.google.com/reader/api/0/sample/path", {:option => 'one'}).returns(@response)
+          @client.expects(:post).with("http://www.google.com/reader/api/0/sample/path", 
+                                      :form_data => { :option => 'one', 
+                                                      :T => 'token', 
+                                                      :async => false }).returns(@response)
           @connection.post "sample/path", :option => "one"
         end
         

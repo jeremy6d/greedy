@@ -16,8 +16,8 @@ module Greedy
       JSON.parse response.body
     end
     
-    def post(path, options = {})
-      response = @client.post full_path(path), options
+    def post(path, form_data = {})
+      response = @client.post full_path(path), :form_data => form_data.merge(:T => @token, :async => false)
       JSON.parse response.body
     end
     
@@ -29,11 +29,14 @@ module Greedy
     # This is all straight from http://code.google.com/apis/gdata/articles/gdata_on_rails.html
     def connect!
       handler = GData::Auth::ClientLogin.new('reader', :account_type => "HOSTED_OR_GOOGLE")
-      token = handler.get_token(@username, @password, @application_name)
+      @token = handler.get_token(@username, @password, @application_name)
       @client = GData::Client::Base.new(:auth_handler => handler)
-      connected?
-    rescue Exception => e
-      (@client = nil) && true
+    rescue GData::Client::RequestError => e
+      if Greedy::AuthorizationError.gdata_errors.include?(e.class.to_s)
+        raise Greedy::AuthorizationError.new(e.message)
+      else
+        raise Greedy::ServiceError.new(e.message)
+      end
     end
     
     def full_path(path)
@@ -47,4 +50,5 @@ module Greedy
       "?#{result}"
     end
   end
+
 end
