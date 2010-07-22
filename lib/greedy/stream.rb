@@ -1,55 +1,44 @@
-require 'greedy'
-
 module Greedy
-  class Stream # should this be connection? Should reading list be stream?
+  class Stream
     BASE_PATH = "stream/contents/user/-/state/com.google/"    
 
-    attr_accessor :entries    
+    attr_accessor :entries, :last_update_token
   
-    def initialize(in_connection, in_state = "reading-list", in_options = {})
-      @connection = in_connection
+    def initialize(username, password, in_state = "reading-list", in_options = {})
+      @connection = Greedy::Connection.new(username, password, "Greedy::Stream")
       reset!(in_state, in_options)
     end
     
-    def reset!(in_state, in_options = {})
+    def reset!(in_state = "reading-list", in_options = {})
       @state = in_state
       @options = in_options
-      path = [BASE_PATH, @state].join
-      
-      pull! @connection.fetch path, @options
+      @entries = pull!(endpoint(@state), @options)
     end
     
-    def update!(in_state = "reading-list")
-      @connection.fetch endpoint(in_state), @options
-      
-      
-      json_hash = parsed_reading_list
-      @continuation_token = json_hash['continuation']
-      @last_update_token = json_hash['updated']
-      @entries = json_hash['items'].collect do |item|
-        nil
-      end
+    def continue!
+      new_entries = pull!(endpoint(@state), @options.merge(:c => @continuation_token))
+      @entries.concat new_entries
+      new_entries
     end
     
-    def retrieve(options)
-      # use the continuation to get more info
-    end
-  
-    def parsed_reading_list
-      url = Greedy::Connection::BASE_URL + READING_LIST_PATH
-      JSON.parse @connection.get(url).body
-    end
-    
-    def set_initial_state! in_state
-      @endpoint = 
-      retrieve_entries()
+    def update!
+      new_entries = pull!(endpoint(@state), @options.merge(:ot => @last_update_token))
+      @entries = new_entries + @entries
+      new_entries
     end
     
   protected
     def pull! path, options
-      hash = @connection.fetch path, options
-      @continuation_token = hash[:continuation]
-      @last_update_token = hash[:updated]
+      hash = @connection.fetch(path, options) || { 'items' => [] }
+      @continuation_token = hash['continuation'] unless options[:ot]
+      @last_update_token = hash['updated'] unless options[:c]
+      hash["items"].collect do |entry_hash|
+        Greedy::Entry.new entry_hash
+      end
+    end
+    
+    def endpoint(state)
+      File.join BASE_PATH, state
     end
   end
 end
