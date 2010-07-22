@@ -11,7 +11,8 @@ module Greedy
     
     
     def fetch(path, options = {})
-      response = @client.get [full_path(path), convert_to_querystring(options)].join
+      url = [full_path(path), convert_to_querystring(options)].join
+      response = @client.get url
       JSON.parse response.body
     end
     

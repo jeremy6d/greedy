@@ -1,4 +1,4 @@
-module Greedy
+module Greedy  
   class Entry
     attr_reader :title, :author, :href, :google_item_id, :feed, :categories, :body
   

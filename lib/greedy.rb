@@ -1,7 +1,8 @@
-require 'httparty'
 require 'gdata'
+require 'nokogiri'
 require 'json'
-# require 'greedy/entry'
-# require 'greedy/stream'
-puts Dir.pwd
+require 'ruby-debug'
+
 require 'lib/greedy/connection'
+require 'lib/greedy/stream'
+require 'lib/greedy/entry'
