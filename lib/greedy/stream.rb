@@ -56,8 +56,6 @@ module Greedy
   protected
     # Retrieve entries based on the provided path and options
     def pull! path, options
-      puts path
-      puts options
       hash = @connection.fetch(path, options) || { 'items' => [] }
       @continuation_token = hash['continuation'] unless options[:ot]
       @last_update_token = hash['updated'] unless options[:c]
@@ -68,7 +66,13 @@ module Greedy
     
     # Accepts an array of entries and sets an array of feeds for the stream
     def distill_feeds_from entry_list
-      entry_list.collect { |e| e.feed }.uniq
+      feeds = entry_list.collect { |e| e.feed }.uniq
+      entry_list.each do |e|
+        f = feeds.find { |f| f.google_feed_id == e.feed.google_feed_id }
+        f.entries.push(e) if f
+        f.entries.uniq!
+      end
+      feeds
     end
     
     # Determine the unique URL segment for a given state
