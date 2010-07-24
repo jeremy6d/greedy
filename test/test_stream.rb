@@ -92,8 +92,12 @@ class TestStream < Test::Unit::TestCase
         end
       end
       
-      context "when marking" do
-        #todo: post to gr api with state changes on entries
+      context "when changing the state of an entry" do
+        setup do
+          @connection.expects(:post).with("broadcast", { :a => state,
+                                                         :i => entry.google_item_id,
+                                                         :s => entry.feed.google_feed_id })
+        end
       end
     end
     
