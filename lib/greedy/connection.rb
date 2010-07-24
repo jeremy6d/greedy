@@ -1,3 +1,6 @@
+require 'gdata'
+require 'nokogiri'
+require 'json'
 require 'cgi'
 
 module Greedy
@@ -32,9 +35,9 @@ module Greedy
     # Issue a POST HTTP request to the Google Reader API
     # Example:
     #   connection.fetch "stream/contents/user/-/state/com.google/edit-tag", :form_data => { :async => false, :a => 'broadcast' }
-    def post(path, form_data)
-      uri = p[full_path(path), convert_to_querystring(:client => @application_name)]
-      response = @client.post , convert_to_post_body(form_data)
+    def post(path, form_data = {})
+      uri = [full_path(path), convert_to_querystring(:client => @application_name)].join
+      response = @client.post uri, convert_to_post_body(form_data)
       JSON.parse response.body
     rescue GData::Client::RequestError => e
       if Greedy::AuthorizationError.gdata_errors.include?(e.class.to_s)
@@ -55,8 +58,7 @@ module Greedy
     def connect!
       handler = GData::Auth::ClientLogin.new('reader', :account_type => "HOSTED_OR_GOOGLE")
       @token = handler.get_token(@username, @password, @application_name)
-      @client = GData::Client::Base.new(:auth_handler => handler, 
-                                        :headers => { 'Content-Type' => "application/x-www-form-urlencoded;charset=utf-8" })
+      @client = GData::Client::Base.new(:auth_handler => handler)
     rescue GData::Client::RequestError => e
       if Greedy::AuthorizationError.gdata_errors.include?(e.class.to_s)
         raise Greedy::AuthorizationError.new(e.message)
@@ -80,7 +82,9 @@ module Greedy
     end
     
     def parameterize in_hash
-      result = in_hash.collect do |key, value|
+      result = in_hash.to_a.sort do |a,b|
+        a.to_s <=> b.to_s
+      end.collect do |key, value|
         [CGI.escape(key.to_s), CGI.escape(value.to_s)].join("=")
       end.join("&")
     end

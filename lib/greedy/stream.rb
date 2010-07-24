@@ -1,19 +1,24 @@
+require 'gdata'
+require 'nokogiri'
+require 'json'
+require 'cgi'
+
 module Greedy
   class Stream
-    BASE_PATH = "stream/contents/user/-/state/com.google/"  
-    CHANGE_STATE_PATH = "edit-tag"  
+    BASE_PATH = "stream/contents/"
+    CHANGE_STATE_PATH = "user/-/state/com.google/edit-tag"  
 
     attr_accessor :entries, :feeds, :last_update_token
   
     # Instantiate a new Google Reader stream of entries based on a given entry state
-    def initialize(username, password, in_state = Greedy::Entry::States::READING_LIST, in_options = {})
+    def initialize(username, password, in_state = nil, in_options = {})
       @connection = Greedy::Connection.new(username, password, in_options[:connection_name] || "Greedy::Stream")
       reset!(in_state, in_options)
     end
     
     # Wipe the stream and reinitialize with the given state
-    def reset!(in_state = Greedy::Entry::States::READING_LIST, in_options = {})
-      @state = in_state
+    def reset!(in_state = nil, in_options = {})
+      @state = in_state || @state || Greedy::Entry::States::READING_LIST
       @options = in_options
       @entries = pull!(endpoint(@state), @options)
       @feeds = distill_feeds_from @entries
@@ -34,6 +39,7 @@ module Greedy
     end
     
     def change_state_for(entry, state)
+      debugger
       @connection.post((BASE_PATH + CHANGE_STATE_PATH), { :a => state,
                                                           :i => entry.google_item_id,
                                                           :s => entry.feed.google_feed_id })
@@ -50,6 +56,8 @@ module Greedy
   protected
     # Retrieve entries based on the provided path and options
     def pull! path, options
+      puts path
+      puts options
       hash = @connection.fetch(path, options) || { 'items' => [] }
       @continuation_token = hash['continuation'] unless options[:ot]
       @last_update_token = hash['updated'] unless options[:c]

@@ -8,9 +8,9 @@ class TestStream < Test::Unit::TestCase
   
     context "initializing with successful pull from Google" do
       setup do
-        Greedy::Connection.stubs(:new).with("username", "passwort", "Greedy::Stream").returns(@connection)
         @response_hash = eval(File.open('test/fixtures/success_json_hash.txt').read)
-        @connection.stubs(:fetch).with("stream/contents/user/-/state/com.google/reading-list", {}).returns(@response_hash)
+        @connection.expects(:fetch).with("stream/contents/user/-/state/com.google/reading-list", {}).returns(@response_hash)
+        Greedy::Connection.expects(:new).with("username", "passwort", "Greedy::Stream").returns(@connection)
         @reading_list = Greedy::Stream.new "username", "passwort"
       end
   

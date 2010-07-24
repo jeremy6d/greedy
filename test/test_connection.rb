@@ -76,10 +76,8 @@ class TestConnection < Test::Unit::TestCase
     
       context "send data" do
         should "send a POST to the path with the options turned into the POST body" do
-          @client.expects(:post).with("http://www.google.com/reader/api/0/sample/path", 
-                                      :form_data => { :option => 'one', 
-                                                      :T => 'token', 
-                                                      :async => false }).returns(@response)
+          @client.expects(:post).with("http://www.google.com/reader/api/0/sample/path?client=app", 
+                                      "T=token&async=false&option=one").returns(@response)
           @connection.post "sample/path", :option => "one"
         end
         
