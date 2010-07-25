@@ -1,7 +1,5 @@
 $:.unshift(File.join(File.dirname(__FILE__), %w[lib]))
 
-puts "\n\nLOCAL VERSION\n\n"
-
 require "rubygems"
 
 require 'gdata'

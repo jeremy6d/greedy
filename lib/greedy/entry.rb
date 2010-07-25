@@ -24,22 +24,21 @@ module Greedy
     # Instantiate and normalize a new Google Reader entry
     def initialize(item, stream = nil)
       @stream = stream
-      raise "Title is nil" unless item['title']
-      @title = normalize item['title']
+      @feed = Greedy::Feed.new(item['origin'])
+      
       @author = normalize item['author'] 
       @href = item['alternate'].first['href']
       @google_item_id = item['id']
       @published = item['published']
       @updated = item['updated']
-      puts "error rendering body for hash\n#{item.inspect}" unless set_body!(item)
-      @feed = Greedy::Feed.new(item['origin'])
+      
+      set_body!(item)
+      set_title!(item)
     end
-    
-    def
   
     # Provide the entry time by which the entry should be sorted amongst other entries
     def sort_by_time
-      updated_at || published_at
+      (updated_at || published_at)
     end
   
     # Provide the canonical publish date in +Time+ format
@@ -51,8 +50,27 @@ module Greedy
     def updated_at
       Time.at @updated rescue nil
     end
+    
+    def mark_as_read!
+      stream.change_state_for(self, States::READ)
+    end
+    
+    def share!
+      stream.change_state_for(self, States::BROADCAST)
+    end
   
-    # Set the body of the entry as normalized text and create a truncated version
+  protected
+    def set_title!(hash)
+      raw_title = hash['title'] || "#{@feed.title} - #{published_at.strftime "%B %d"}"
+      @title = normalize raw_title
+      true
+    end
+    
+    def normalize(text)
+      return text if text.nil?
+      Nokogiri::XML::DocumentFragment.parse(text).to_html
+    end
+    
     def set_body!(in_hash)
       raw_text = begin
         key = %w(content summary container).detect { |key| in_hash[key] }
@@ -78,21 +96,6 @@ module Greedy
 
       @truncated_body = doc.children.slice(0, index).to_html
       true
-    end
-    
-    def mark_as_read!
-      stream.change_state_for(self, States::READ)
-    end
-    
-    def share!
-      stream.change_state_for(self, States::BROADCAST)
-    end
-  
-  protected
-  
-    def normalize(text)
-      return text if text.nil?
-      Nokogiri::XML::DocumentFragment.parse(text).to_html
     end
   end
 end
