@@ -7,10 +7,10 @@ require 'nokogiri'
 require 'json'
 require 'cgi'
 
-require 'lib/greedy/connection'
-require 'lib/greedy/stream'
-require 'lib/greedy/entry'
-require 'lib/greedy/feed'
+require 'greedy/connection'
+require 'greedy/stream'
+require 'greedy/entry'
+require 'greedy/feed'
 
 module Greedy
   class ConnectionError < RuntimeError
