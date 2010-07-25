@@ -5,7 +5,7 @@ class TestEntry < Test::Unit::TestCase
     setup do
       @stream = stub("Greedy::Stream")
       @raw_entry = a_typical_raw_entry_hash
-      @feed = stub("Greedy::Feed", :title => "The Feed Title")
+      @feed = stub("Greedy::Feed", :title => "The Feed Title", :href => "feed path")
       Greedy::Feed.stubs(:new).returns(@feed)
     end
     
@@ -42,6 +42,11 @@ class TestEntry < Test::Unit::TestCase
     should "set the title to a default setting if the feed supplies no entry title" do
       @raw_entry['title'] = nil
       Greedy::Entry.new(@raw_entry, @stream).title.should == "The Feed Title - July 22"
+    end
+    
+    should "set the href to the feed href if the entry href is missing" do
+      @raw_entry['alternate'] = nil
+      Greedy::Entry.new(@raw_entry, @stream).href.should == "feed path"
     end
     
     should_eventually "be able to share itself" do

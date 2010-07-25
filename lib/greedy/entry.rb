@@ -26,14 +26,14 @@ module Greedy
       @stream = stream
       @feed = Greedy::Feed.new(item['origin'])
       
-      @author = normalize item['author'] 
-      @href = item['alternate'].first['href']
+      @author = normalize item['author']  
       @google_item_id = item['id']
       @published = item['published']
       @updated = item['updated']
       
       set_body!(item)
       set_title!(item)
+      set_href!(item)
     end
   
     # Provide the entry time by which the entry should be sorted amongst other entries
@@ -60,6 +60,11 @@ module Greedy
     end
   
   protected
+    def set_href!(hash)
+      links = hash['alternate']
+      @href = (links.first['href'] unless (links.nil? || links.empty?)) || @feed.href
+    end
+  
     def set_title!(hash)
       raw_title = hash['title'] || "#{@feed.title} - #{published_at.strftime "%B %d"}"
       @title = normalize raw_title
