@@ -1,11 +1,14 @@
 $:.unshift(File.join(File.dirname(__FILE__), %w[lib]))
 
+puts "\n\nLOCAL VERSION\n\n"
+
 require "rubygems"
 
 require 'gdata'
 require 'nokogiri'
 require 'json'
 require 'cgi'
+require 'ruby-debug'
 
 require 'greedy/connection'
 require 'greedy/stream'

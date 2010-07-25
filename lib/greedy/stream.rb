@@ -39,7 +39,6 @@ module Greedy
     end
     
     def change_state_for(entry, state)
-      debugger
       @connection.post((BASE_PATH + CHANGE_STATE_PATH), { :a => state,
                                                           :i => entry.google_item_id,
                                                           :s => entry.feed.google_feed_id })
