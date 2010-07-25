@@ -1,8 +1,3 @@
-require 'gdata'
-require 'nokogiri'
-require 'json'
-require 'cgi'
-
 module Greedy
   class Connection
     BASE_URL = "http://www.google.com/reader/api/0/"

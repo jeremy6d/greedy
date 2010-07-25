@@ -1,8 +1,3 @@
-require 'gdata'
-require 'nokogiri'
-require 'json'
-require 'cgi'
-
 module Greedy
   class Stream
     BASE_PATH = "stream/contents/"
