@@ -30,25 +30,45 @@ class TestStream < Test::Unit::TestCase
         setup do
           assert_equal @reading_list.instance_variable_get("@continuation_token"), "continuationtoken"
           @continued_response_hash = eval(File.open('test/fixtures/another_success_hash.txt').read)
-          @connection.expects(:fetch).with("stream/contents/user/-/state/com.google/reading-list", 
-                                             { :c => "continuationtoken" }).returns(@continued_response_hash)
         end
         
-        should "send the continuation token on the next pull" do
-          @reading_list.continue!
-          @reading_list.instance_variable_get("@continuation_token").should == "CKXmmOLq_aIC"
-        end
+        context "when there's more entries to get" do
+          setup do
+            @connection.expects(:fetch).with("stream/contents/user/-/state/com.google/reading-list", 
+                                               { :c => "continuationtoken" }).returns(@continued_response_hash)
+          end
         
-        should "increase the entries size" do
-          entry_count = @reading_list.entries.size
-          continued_count = @reading_list.continue!.size
-          @reading_list.entries.size.should == (entry_count + continued_count)
-        end
+          should "send the continuation token on the next pull" do
+            @reading_list.continue!
+            @reading_list.instance_variable_get("@continuation_token").should == "CKXmmOLq_aIC"
+          end
         
-        should "not change the last update token" do
-          token = @reading_list.instance_variable_get("@last_update_token")
-          @reading_list.continue!
-          @reading_list.instance_variable_get("@last_update_token").should == token
+          should "increase the entries size" do
+            entry_count = @reading_list.entries.size
+            continued_count = @reading_list.continue!.size
+            @reading_list.entries.size.should == (entry_count + continued_count)
+          end
+        
+          should "not change the last update token" do
+            token = @reading_list.instance_variable_get("@last_update_token")
+            @reading_list.continue!
+            @reading_list.instance_variable_get("@last_update_token").should == token
+          end
+        end
+
+        context "when no more entries exist to fetch" do
+          setup do
+            @reading_list.instance_variable_set "@continuation_token", nil
+          end
+          
+          should "return an empty array if no continuation token was set on last fetch" do
+            @reading_list.continue!.should == []
+          end
+        
+          should "never attempt the continuation fetch" do
+            @connection.expects(:fetch).never
+            @reading_list.continue!
+          end
         end
       end
       

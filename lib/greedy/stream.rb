@@ -21,6 +21,7 @@ module Greedy
     
     # Continue fetching earlier entries from where the last request left off
     def continue!
+      return [] unless @continuation_token
       new_entries = pull!(endpoint(@state), @options.merge(:c => @continuation_token))
       @entries.concat new_entries
       new_entries
